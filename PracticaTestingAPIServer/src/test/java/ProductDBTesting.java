@@ -12,6 +12,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -78,5 +79,56 @@ public class ProductDBTesting {
 			this.TestSingleProduct(streamProduct);
 		});
 	}
+	
+	@Test
+    public void TestAddProduct() {
+		//Genero un producto testProduct2
+		Product testProduct2 = new Product("Ordenador", 123, "Bonito", "Med", "USA",	2017, 11, 5);
+		ArgumentCaptor<Product> productCaptor = ArgumentCaptor.forClass(Product.class);
+		//Llamo al método de la clase
+		this.productDB.AddProduct(testProduct2);
+		//Compruebo que se llama al método save del repositorio
+		verify(productRepository).save(productCaptor.capture());
+		//Capturo el producto (testProduct) que el servicio envía al repositorio
+		Product testProduct = productCaptor.getValue();
+		//Compruebo que los datos son los correctos
+		Assert.assertEquals("wrong Name", testProduct.getName(),"Ordenador");
+		Assert.assertEquals("wrong Price", testProduct.getPrice(),123,0.01);
+		Assert.assertEquals("wrong Description", testProduct.getDescription(),"Bonito");
+		Assert.assertEquals("wrong Size", testProduct.getSize(),"Med");
+		Assert.assertEquals("wrong Origin", testProduct.getOrigin(),"USA");
+		Assert.assertEquals("wrong Year in Lot", testProduct.getYearLot(),2017);
+		Assert.assertEquals("wrong Month in Lot", testProduct.getMonthLot(),11);
+		Assert.assertEquals("wrong Day in Lot", testProduct.getDayLot(),5);
+    }
+	
+	@Test
+    public void TestEditProduct() {
+		//Como el anterior
+		Product testProduct2 = new Product("Ordenador", 123, "Bonito", "Med", "USA",	2017, 11, 5);
+		ArgumentCaptor<Product> productCaptor = ArgumentCaptor.forClass(Product.class);
+		this.productDB.EditProduct(testProduct2);
+		verify(productRepository).save(productCaptor.capture());
+		Product testProduct = productCaptor.getValue();
+		Assert.assertEquals("wrong Name", testProduct.getName(),"Ordenador");
+		Assert.assertEquals("wrong Price", testProduct.getPrice(),123,0.01);
+		Assert.assertEquals("wrong Description", testProduct.getDescription(),"Bonito");
+		Assert.assertEquals("wrong Size", testProduct.getSize(),"Med");
+		Assert.assertEquals("wrong Origin", testProduct.getOrigin(),"USA");
+		Assert.assertEquals("wrong Year in Lot", testProduct.getYearLot(),2017);
+		Assert.assertEquals("wrong Month in Lot", testProduct.getMonthLot(),11);
+		Assert.assertEquals("wrong Day in Lot", testProduct.getDayLot(),5);
+    }
+	
+	@Test
+    public void TestDeleteProduct() {
+		Long idToSend = (long) 2;
+		ArgumentCaptor<Long> IdCaptor = ArgumentCaptor.forClass(Long.class);
+		//Llamo al método delete de mi DB con un ID conocido (en este caso 2)
+		this.productDB.DeleteProduct(idToSend);
+		//Compruebo que llama al delete de mi repositorio, y capturo el valor de la Id enviada.
+		verify(productRepository).delete(IdCaptor.capture());
+		Assert.assertEquals("wrong delete Id sent", idToSend, IdCaptor.getValue());
+    }
 	
 }
